@@ -11,9 +11,9 @@ json: {attr:target,attr:target,...} 同时运动的属性及目标值，目标�
 fn：(可选)链函数
 
 用法实例：
- var div1=document.getElementById('div1');
- div1.onmouseover = function(){
-      startMove(div1,{width:400},function(){
-        startMove(div1,{height:200});
-    });
- }
+ var div1=document.getElementById('div1');  
+ div1.onmouseover = function(){  
+ startMove(div1,{width:400},function(){  
+      startMove(div1,{height:200});  
+        });  
+    }
