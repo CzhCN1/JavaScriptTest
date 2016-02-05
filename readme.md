@@ -9,6 +9,7 @@
  4. 移除对象上的指定事件 `eventUtil.removeHandler(element，eventType，handler)`
  5. 阻止事件冒泡 `eventUtil.cancelBubble(event)`
  6. 阻止事件默认行为 `eventUtil.preventDefault(event)`  
+ 7. 用于在当前文档结构载入完毕后立即执行指定的函数`eventUtil.ready(fn)`
    
 ####查询类：
  7. 通过class查找元素 `query.getByClass(oParent，className)`

@@ -81,6 +81,71 @@ var eventUtil = {
 			event.returnValue = false;				//IE中的阻止事件的默认行为
 		}
 	},
+
+	/**
+	 * [ready DOM树生成后立即执行]
+	 * @param  {Function} fn [需执行的函数]
+	 */
+	ready: function (fn){
+		//定义DOM树加载完成后执行的函数
+		var completed = function(event){
+			//确认DOM树加载完成 或 页面加载完成
+			if ( document.addEventListener || event.type === "load" || document.readyState === "complete" ){
+			//清除事件
+				if ( document.addEventListener ) {
+		                	document.removeEventListener( "DOMContentLoaded", completed, false );
+		                	window.removeEventListener( "load", completed, false );
+		            	} else {
+		                	document.detachEvent( "onreadystatechange", completed );
+		                	window.detachEvent( "onload", completed );
+		            	}
+		            	//执行ready后的回调函数
+		            	fn();
+			}
+		};
+
+		//非IE浏览器
+		if(document.addEventListener){
+			//DOM树加载完成
+			document.addEventListener('DOMContentLoaded', completed, false);
+			//页面加载完成会再执行一次回调函数
+			window.addEventListener('load',completed,false);
+
+		//IE浏览器
+		}else{
+			//IE浏览器，frame框架使用下面的方法
+			//DOM树加载完成
+			document.attachEvent( "onreadystatechange", completed );
+			//页面加载完成会再执行一次回调函数
+               	window.attachEvent( "onload", completed );
+
+               	//IE浏览器，非frame框架
+               	var top = false;
+               	try{
+               		//判断是否是frame框架
+               		top = window.frameElement === null && document.documentElement;
+               	}catch(e) {}
+
+               	//不是frame框架则执行下面的方法
+               	if(top && top.doScroll){
+               		(function doScrollCheck(){
+               			try {
+                               	// Use the trick by Diego Perini
+                               	// 如果DOM树加载未完成，执行doScroll方法将抛出错误
+                               		top.doScroll("left");
+	                       	} catch(e) {
+	                       		return setTimeout( doScrollCheck, 50 );
+	                      	}
+	                            //清除事件
+	                   		document.detachEvent( "onreadystatechange", completed );
+		             	window.detachEvent( "onload", completed );
+			     		//执行ready后的回调函数
+			         	fn();
+               		})();
+               	}
+		}
+	},
+
 };
 
 
@@ -121,7 +186,7 @@ var query = {
 		if(element.currentStyle){					//早期IE兼容
 			return element.currentStyle[attr];
 		}else{
-			return getComputedStyle(element,false)[attr];
+			return getComputedStyle(element,null)[attr];
 		}
 
 	},
@@ -160,7 +225,7 @@ var animate = {
 						obj.style.filter = 'alpha(opacity:' + (currentValue + speed) + ')';	//IE浏览器
   						obj.style.opacity = (currentValue + speed ) / 100;					//非IE浏览器
 					}else{
-						obj.style[attr] = (currentValue + speed) + 'px';
+						obj.style[attr] = currentValue + speed + 'px';
 					}
 				}else{
 					stopFlag = true;
