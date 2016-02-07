@@ -16,6 +16,6 @@
  8. 获取对象的指定属性值 `query.getStyle(element，attr)`
   
 ####动画类:
- 1. 简单的运动功能，改变高度、宽度、透明度、位置等属性`animate.move(obj,attrs,fn)`
-
+ 1. 简单的运动功能，改变高度、宽度、透明度、位置等属性`animate.move(obj,attrs,fn)`  
+ 2. 简单的拖拽功能，可设定拖拽对象和拖拽范围对象，当oWrap为空时默认拖拽范围为全部页面。`animate.drag(obj,oWrap)`
  

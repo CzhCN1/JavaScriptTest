@@ -193,7 +193,10 @@ var query = {
 };
 
 
-
+/**
+ * [animate 常用的小动画]
+ * Czh 2016-02-05
+ */
 var animate = {
 
 	/**
@@ -243,7 +246,116 @@ var animate = {
 	},
 
 
+	/**
+	 * [drag 简单的拖拽方法，可设定拖拽对象及范围对象。]
+	 * @param  {[type]} obj   	[拖拽对象]
+	 * @param  {[type]} oWrap	 [拖拽范围对象，若为空则默认为整个页面]
+	 *
+	 * 注意：obj的position属性必须为absolute，而oWrap对象必须为obj最近的已定位的祖先元素，否则会报错。
+	 * 		为了尽量不影响原页面的布局，该脚本不进行position属性的修改。
+	 */
+	drag:function (obj, oWrap) {
+		//为拖拽对象添加鼠标按下事件
+		eventUtil.addHandler(obj, 'mousedown', function (event){
+			//规则检测
+			try{
+				//检测该对象是否为绝对定位
+				if(query.getStyle(obj,'position') != 'absolute'){
+					throw "object's position not absolute";
+				}
+				//如果有oWrap参数进行检测  若没有则默认拖拽范围为整个页面
+				var target = obj.parentNode;
 
+				if(oWrap){
+					//检测oWrap是否为obj最近的已定位祖先元素
+					while(target.tagName != 'BODY'){
+						if(target === oWrap){
+							break;
+						}else if(query.getStyle(target,'position')  != 'static'){
+							throw "oWrap not the nearest located ancestor element";
+						}
+						target = target.parentNode;
+					}
+					//如果检测到body 说明oWrap不是obj的祖先元素
+					if(target.tagName == 'BODY'){
+						throw "oWrap not the obj's ancestor element";
+					}
+					//判断范围对象是否已定位
+					//若未定位则不能作为偏移参照基准
+					if(query.getStyle(oWrap,'position') == 'static'){
+						throw "oWrap's position not located";
+					}
+				}else{
+					while(target.tagName != 'BODY'){
+						if(query.getStyle(target,'position')  != 'static'){
+							throw "document not the nearest located ancestor element";
+						}
+						target = target.parentNode;
+					}
+				}
+			}catch(err){
+				//打印错误并结束
+				console.log(err);
+				return;
+			}
+			event = eventUtil.getEvent(event);
+				//页面卷去的距离
+			var scrollT = document.documentElement.scrollTop || document.body.scrollTop,
+				scrollL = document.documentElement.scrollLeft || document.body.scrollLeft,
+				//计算出鼠标在拖拽对象上的位置
+				posX = event.clientX - obj.offsetLeft + scrollL,
+				posY = event.clientY - obj.offsetTop + scrollT;
 
+			//添加鼠标移动事件
+			document.onmousemove = function (e){
+				e = eventUtil.getEvent(e);
+
+					//页面卷去的距离
+				var 	scrollT = document.documentElement.scrollTop || document.body.scrollTop,
+					scrollL = document.documentElement.scrollLeft || document.body.scrollLeft,
+					//计算拖拽对象移动后距离页面顶部和左侧的距离
+					disX = e.clientX - posX + scrollL,
+					disY = e.clientY - posY + scrollT,
+					//页面的宽度和高度
+					winW = document.documentElement.scrollWidth || document.body.scrollWidth,
+					winH = document.documentElement.scrollHeight || document.body.scrollHeight,
+					//计算拖拽范围
+					maxX = winW - obj.offsetWidth - 3,
+					maxY = winH - obj.offsetHeight - 3,
+					minX = 3,
+					minY = 3;
+
+				//如果有范围对象
+				if(oWrap){
+					//若有范围限制需要修改拖拽范围
+					maxX = oWrap.offsetWidth - obj.offsetWidth - 3;
+					maxY = oWrap.offsetHeight - obj.offsetHeight - 3;
+				}
+
+				//范围检测
+				if(disX < minX){
+					disX = minX;
+				}else if(disX > maxX){
+					disX = maxX;
+				}
+				if(disY < 0){
+					disY = 0;
+				}else if(disY > maxY){
+					disY = maxY;
+				}
+
+				//移动拖拽对象
+				obj.style.left = disX + 'px';
+				obj.style.top = disY + 'px';
+			};
+
+			//松开鼠标卸载事件
+			document.onmouseup = function(){
+				document.onmousemove = null;
+				document.onmouseup = null;
+			};
+		});
+
+	},
 
 };
